@@ -13,6 +13,8 @@ include Magick
 
 $wgdir="/tmp/wg"
 $thumbdir="/tmp/thumbs"
+
+#Make necessary directories
 def make_dir(threadnum)
         if ! Dir.exists?($wgdir)
                 Dir.mkdir($wgdir)
@@ -28,6 +30,7 @@ def make_dir(threadnum)
         end
 end
 
+#Function to download individual files per the url
 def download(url)
         filedl = url.split("/").last
         uri = URI.parse(url)
@@ -40,17 +43,41 @@ def download(url)
         return filedl
 end
 
-thread = ARGV.first
-thread_num = thread.split("/").last
-make_dir(thread_num)
-Dir.chdir("#{$wgdir}/#{thread_num}")
+#Function downloads an entire thread of images and create thumbnails
+def get_thread(thread)
+	thread_num = thread.split("/").last
+	make_dir(thread_num)
+	Dir.chdir("#{$wgdir}/#{thread_num}")
 
-doc = Nokogiri::HTML(open(thread))
-doc.css('div.fileInfo a').each do |link|
-	link_s = link['href'].gsub("//", "http://")
-	download(link_s)
-	img_file_name = link_s.split("/").last
-	img = ImageList.new img_file_name
-	thumb = img.scale(160,90)
-	thumb.write "#{$thumbdir}/#{thread_num}/thumb_#{img_file_name}"
+	#Open the thread html file, search for image locatoins
+	doc = Nokogiri::HTML(open(thread))
+	doc.css('div.fileInfo a').each do |link|
+        	link_s = link['href'].gsub("//", "http://")
+        	download(link_s)
+        	img_file_name = link_s.split("/").last
+        	img = ImageList.new img_file_name
+        	thumb = img.scale(240,135)
+        	thumb.write "#{$thumbdir}/#{thread_num}/thumb_#{img_file_name}"
+	end
+
 end
+
+#The main loop
+loop {
+doc = Nokogiri::HTML(open("http://boards.4chan.org/wg/8"))
+
+#Search for number of images in each thread.
+#Will download any that has => 20 images
+doc.css('span.summary').each do |thing|
+	if thing.content.match(/[\ ,0-9][2-9][0-9]\ image\ replies/)
+		thread_loc = thing.css('a').attr('href').value
+		if !Dir.exists?("#{$wgdir}/#{thread_loc.split("/").last}")
+			thread_url = "http://boards.4chan.org/wg/#{thread_loc}"
+			get_thread(thread_url)
+		end
+	end
+end
+
+#Sleep for 1 hour
+sleep(3600)
+}
