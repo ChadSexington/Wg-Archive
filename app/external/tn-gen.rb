@@ -8,10 +8,10 @@ include Magick
 image_dir = Dir.new "/home/tiwillia/Pictures/4chan/wg/"
 thumb_dir = Dir.new "/home/tiwillia/Thumbnails/4chan/wg/"
 
-image_dir.each { |cat|
+image_dir.each do |cat|
 if ! cat.match(/^\.+$/)
 	cat_dir = Dir.new "#{image_dir.path}#{cat}"
-	cat_dir.each { |image|
+	cat_dir.each do |image|
 	if ! image.match(/^\.+$/)
 		img = ImageList.new "#{image_dir.path}#{cat}/#{image}"
 		thumb = img.scale(180, 120)
@@ -21,6 +21,6 @@ if ! cat.match(/^\.+$/)
 		Dir.chdir "#{thumb_dir.path}#{cat}"
 		thumb.write "thumb_#{image}"
 	end
-	}
+	end
 end
-}
+end
