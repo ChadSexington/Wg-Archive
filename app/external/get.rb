@@ -5,6 +5,7 @@
 # into folders and include the title and text from the very first post. It should also exclude
 # image modification threads. AFter it downloads and organizes the images, it should then create
 # thumbnails (16:9) so that they can be easily displayed as a list in a rails application.
+#TEST
 
 require 'nokogiri'
 require 'open-uri'
