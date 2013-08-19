@@ -1,0 +1,2 @@
+module ImageThreadHelper
+end
